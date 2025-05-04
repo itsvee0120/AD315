@@ -1,0 +1,61 @@
+import java.util.Locale;
+
+public class ComparativeStudy {
+
+    public static void main(String[] args) {
+        System.out.println("IEEE 754 Floating-Point Representation Comparison Across Languages");
+        System.out.println("==============================================================");
+        System.out.println();
+
+        // Java implementation
+        System.out.println("Java Implementation:");
+        javaImplementation();
+        System.out.println();
+
+        // Equivalent C implementation (display as code for comparison)
+        System.out.println("Equivalent C Implementation:");
+        displayCImplementation();
+        System.out.println();
+
+        // Equivalent Python implementation (display as code for comparison)
+        System.out.println("Equivalent Python Implementation:");
+        displayPythonImplementation();
+        System.out.println();
+
+        // Equivalent JavaScript implementation (display as code for comparison)
+        System.out.println("Equivalent JavaScript Implementation:");
+        displayJavaScriptImplementation();
+        System.out.println();
+
+        // Comparison of results
+        System.out.println("Comparison of Results Across Languages:");
+        compareResults();
+    }
+
+    private static void javaImplementation() {
+        // Test case 1: 0.1 + 0.2 != 0.3
+        float sum = 0.1f + 0.2f;
+        System.out.println("0.1 + 0.2 = " + sum);
+        System.out.println("0.1 + 0.2 == 0.3? " + (sum == 0.3f));
+        System.out.println("Difference: " + (sum - 0.3f));
+
+        // Test case 2: Division by zero
+        float posInf = 1.0f / 0.0f;
+        float negInf = -1.0f / 0.0f;
+        float nan = 0.0f / 0.0f;
+        System.out.println("\n1.0 / 0.0 = " + posInf);
+        System.out.println("-1.0 / 0.0 = " + negInf);
+        System.out.println("0.0 / 0.0 = " + nan);
+
+        // Test case 3: Underflow
+        float smallest = Float.MIN_VALUE;
+        float underflow = smallest / 2.0f;
+        System.out.println("\nSmallest representable float: " + smallest);
+        System.out.println("Smallest / 2 (underflow): " + underflow);
+
+        // Test case 4: Overflow
+        float largest = Float.MAX_VALUE;
+        float overflow = largest * 2.0f;
+        System.out.println("\nLargest representable float: " + largest);
+        System.out.println("Largest * 2 (overflow): " + overflow);
+    }

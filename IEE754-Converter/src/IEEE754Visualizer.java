@@ -1,0 +1,814 @@
+import javax.swing.*;
+import javax.swing.border.*;
+import javax.swing.event.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.geom.*;
+import java.text.DecimalFormat;
+import java.util.*;
+import java.util.List;
+
+/**
+ * Enhanced IEEE 754 Floating-Point Visualizer with Interactive UI
+ *
+ * Features include:
+ * - Interactive bit manipulation
+ * - Visual representation of IEEE 754 components
+ * - Real-time conversion between binary and decimal
+ * - Special value demonstration
+ * - Precision loss visualization
+ * - Color-coded bit representation
+ */
+public class IEEE754Visualizer extends JFrame {
+
+    // UI Components
+    private JPanel mainPanel;
+    private JPanel bitPanel; // Panel to display individual bits
+    private JPanel controlPanel;
+    private JPanel visualizationPanel;
+    private JLabel valueLabel;
+    private JTextField inputField;
+    private JButton convertButton;
+    private JButton specialValuesButton;
+    private JTabbedPane tabbedPane;
+
+    // Visualization components
+    private NumberLinePanel numberLinePanel;
+    private PrecisionLossPanel precisionLossPanel;
+
+    // IEEE 754 components
+    private JToggleButton[] bitButtons;
+    private JLabel signLabel;
+    private JLabel exponentLabel;
+    private JLabel mantissaLabel;
+
+    // Current value
+    private float currentValue = 0.0f;
+    private int currentBits = 0;
+
+    /**
+     * Constructs the IEEE754Visualizer frame and sets up the UI.
+     */
+    public IEEE754Visualizer() {
+        setTitle("IEEE 754 Interactive Visualizer");
+        setSize(1000, 700);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        setupUI();
+
+        // Initialize with a default value
+        setCurrentValue(42.5f);
+
+        setVisible(true);
+    }
+
+    /**
+     * Sets up the main user interface components and layout.
+     */
+    private void setupUI() {
+        mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+        // Create main panels
+        setupControlPanel();
+        setupBitPanel();
+        setupVisualizationPanel();
+
+        // Create tabbed pane for visualizations
+        tabbedPane = new JTabbedPane();
+        tabbedPane.addTab("Bit Representation", bitPanel);
+
+        // Create and add number line visualization
+        numberLinePanel = new NumberLinePanel();
+        tabbedPane.addTab("Number Line", numberLinePanel);
+
+        // Create and add precision loss visualization
+        precisionLossPanel = new PrecisionLossPanel();
+        tabbedPane.addTab("Precision Loss", precisionLossPanel);
+
+
+        // Add panels to main panel
+        mainPanel.add(controlPanel, BorderLayout.NORTH);
+        mainPanel.add(tabbedPane, BorderLayout.CENTER);
+
+
+        add(mainPanel);
+    }
+
+    /**
+     * Sets up the control panel with input field, buttons, and value display.
+     */
+    private void setupControlPanel() {
+        controlPanel = new JPanel(new BorderLayout());
+        controlPanel.setBorder(new CompoundBorder(
+                new TitledBorder("IEEE 754 Controls"),
+                new EmptyBorder(5, 5, 5, 5)));
+
+        // Input components
+        JPanel inputPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        inputPanel.add(new JLabel("Enter value:"));
+        inputField = new JTextField(10);
+        inputField.addActionListener(e -> convertFromDecimal());
+        inputPanel.add(inputField);
+
+        convertButton = new JButton("Convert");
+        convertButton.addActionListener(e -> convertFromDecimal());
+        inputPanel.add(convertButton);
+
+        specialValuesButton = new JButton("Special Values");
+        specialValuesButton.addActionListener(e -> showSpecialValuesDialog());
+        inputPanel.add(specialValuesButton);
+
+
+        // Value display
+        JPanel valuePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        valuePanel.add(new JLabel("Current Value:"));
+        valueLabel = new JLabel("0.0");
+        valueLabel.setFont(new Font("Monospaced", Font.BOLD, 14));
+        valuePanel.add(valueLabel);
+
+        // Component labels
+        JPanel labelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        signLabel = new JLabel("Sign: 0");
+        exponentLabel = new JLabel("Exponent: 00000000 (0)");
+        mantissaLabel = new JLabel("Mantissa: 00000000000000000000000");
+
+        signLabel.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        exponentLabel.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        mantissaLabel.setFont(new Font("Monospaced", Font.PLAIN, 12));
+
+        labelPanel.add(signLabel);
+        labelPanel.add(exponentLabel);
+        labelPanel.add(mantissaLabel);
+
+        // Put it all together
+        JPanel topPanel = new JPanel(new GridLayout(3, 1));
+        topPanel.add(inputPanel);
+        topPanel.add(valuePanel);
+        topPanel.add(labelPanel);
+
+
+        controlPanel.add(topPanel, BorderLayout.CENTER);
+    }
+
+    /**
+     * Sets up the panel displaying the individual bits of the IEEE 754 representation.
+     */
+    private void setupBitPanel() {
+        bitPanel = new JPanel(new BorderLayout());
+        bitPanel.setBorder(new CompoundBorder(
+                new TitledBorder("IEEE 754 Bit Representation"),
+                new EmptyBorder(5, 5, 5, 5)));
+
+        // Create bit buttons
+        JPanel bitsPanel = new JPanel(new GridLayout(2, 16));
+        bitButtons = new JToggleButton[32];
+
+        // Add bit index labels
+        for (int i = 0; i < 32; i++) {
+            JLabel indexLabel = new JLabel(String.valueOf(31 - i), JLabel.CENTER);
+            indexLabel.setFont(new Font("Monospaced", Font.PLAIN, 12));
+            bitsPanel.add(indexLabel);
+        }
+
+        // Add bit toggle buttons
+        for (int i = 0; i < 32; i++) {
+            final int bitIndex = 31 - i;
+            bitButtons[bitIndex] = new JToggleButton("0");
+            bitButtons[bitIndex].setFont(new Font("Monospaced", Font.BOLD, 14));
+
+            // Color code the bits
+            if (bitIndex == 31) {
+                // Sign bit
+                bitButtons[bitIndex].setBackground(new Color(255, 200, 200));
+            } else if (bitIndex >= 23) {
+                // Exponent bits
+                bitButtons[bitIndex].setBackground(new Color(200, 255, 200));
+            } else {
+                // Mantissa bits
+                bitButtons[bitIndex].setBackground(new Color(200, 200, 255));
+            }
+
+            // Add action listener to update when bits are toggled
+            bitButtons[bitIndex].addActionListener(e -> {
+                updateBitAtIndex(bitIndex, bitButtons[bitIndex].isSelected());
+                updateFromBits();
+            });
+
+            bitsPanel.add(bitButtons[bitIndex]);
+        }
+
+        // Component sections
+        JPanel sectionsPanel = new JPanel(new BorderLayout());
+
+        JPanel headerPanel = new JPanel(new GridLayout(1, 3));
+        headerPanel.add(new JLabel("Sign (1 bit)", JLabel.CENTER));
+        headerPanel.add(new JLabel("Exponent (8 bits)", JLabel.CENTER));
+        headerPanel.add(new JLabel("Mantissa (23 bits)", JLabel.CENTER));
+
+        sectionsPanel.add(headerPanel, BorderLayout.NORTH);
+
+
+        // Add explanation
+        JTextArea explanationArea = new JTextArea();
+        explanationArea.setEditable(false);
+        explanationArea.setLineWrap(true);
+        explanationArea.setWrapStyleWord(true);
+        explanationArea.setText(
+                "IEEE 754 32-bit Single Precision Format:\n\n" +
+                        "- Sign bit: 0 for positive, 1 for negative\n" +
+                        "- Exponent: 8 bits, biased by 127\n" +
+                        "- Mantissa: 23 bits, normalized with implicit leading 1\n\n" +
+                        "Value = (-1)^sign × 2^(exponent-127) × 1.mantissa\n\n" +
+                        "Special cases:\n" +
+                        "- If exponent = 255 and mantissa = 0: Infinity\n" +
+                        "- If exponent = 255 and mantissa ≠ 0: NaN\n" +
+                        "- If exponent = 0 and mantissa = 0: Zero\n" +
+                        "- If exponent = 0 and mantissa ≠ 0: Denormalized number\n"
+        );
+
+        JScrollPane scrollPane = new JScrollPane(explanationArea);
+        scrollPane.setPreferredSize(new Dimension(400, 200));
+
+
+        bitPanel.add(bitsPanel, BorderLayout.NORTH);
+        bitPanel.add(sectionsPanel, BorderLayout.CENTER);
+        bitPanel.add(scrollPane, BorderLayout.SOUTH);
+    }
+
+    /**
+     * Sets up the panel that will contain the visualization tabs.
+     */
+    private void setupVisualizationPanel() {
+        visualizationPanel = new JPanel(new BorderLayout());
+        visualizationPanel.setBorder(new CompoundBorder(
+                new TitledBorder("IEEE 754 Visualization"),
+                new EmptyBorder(5, 5, 5, 5)));
+    }
+
+    /**
+     * Converts the decimal value from the input field to IEEE 754 format.
+     */
+    private void convertFromDecimal() {
+        try {
+            float value = Float.parseFloat(inputField.getText());
+            // Basic check for representable range
+            if (Float.isFinite(value) && (Math.abs(value) > Float.MAX_VALUE || (Math.abs(value) < Float.MIN_NORMAL && value != 0))) {
+                JOptionPane.showMessageDialog(this,
+                        "Value may be outside the standard representable range for normal floats.",
+                        "Warning",
+                        JOptionPane.WARNING_MESSAGE);
+            }
+            setCurrentValue(value);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this,
+                    "Invalid number format. Please enter a valid decimal number.",
+                    "Input Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /**
+     * Sets the current floating-point value and updates the UI and visualizations.
+     * @param value The new floating-point value.
+     */
+    private void setCurrentValue(float value) {
+        currentValue = value;
+        currentBits = Float.floatToIntBits(value);
+
+        // Update display
+        DecimalFormat df = new DecimalFormat("#.##########");
+        valueLabel.setText(df.format(value) + " (0x" + Integer.toHexString(currentBits) + ")");
+
+        // Update bit buttons
+        updateBitDisplay();
+
+        // Update component labels
+        updateComponentLabels();
+
+        // Update visualizations
+        numberLinePanel.updateValue(value);
+        precisionLossPanel.updateValue(value);
+    }
+
+    /**
+     * Updates the state of the bit toggle buttons based on the current bits.
+     */
+    private void updateBitDisplay() {
+        for (int i = 0; i < 32; i++) {
+            boolean isSet = ((currentBits >> i) & 1) == 1;
+            bitButtons[i].setSelected(isSet);
+            bitButtons[i].setText(isSet ? "1" : "0");
+        }
+    }
+
+    /**
+     * Updates the labels displaying the sign, exponent, and mantissa components.
+     */
+    private void updateComponentLabels() {
+        // Extract IEEE 754 components
+        int sign = (currentBits >> 31) & 0x1;
+        int exponent = (currentBits >> 23) & 0xFF;
+        int mantissa = currentBits & 0x7FFFFF;
+
+        // Format binary strings
+        String exponentBinary = String.format("%8s", Integer.toBinaryString(exponent)).replace(' ', '0');
+        String mantissaBinary = String.format("%23s", Integer.toBinaryString(mantissa)).replace(' ', '0');
+
+        // Update labels
+        signLabel.setText("Sign: " + sign);
+        exponentLabel.setText("Exponent: " + exponentBinary + " (" + (exponent - 127) + ")");
+        mantissaLabel.setText("Mantissa: " + mantissaBinary);
+    }
+
+    /**
+     * Updates a specific bit at the given index in the current bit representation.
+     * @param index The index of the bit to update (0-31).
+     * @param value The new boolean value of the bit (true for 1, false for 0).
+     */
+    private void updateBitAtIndex(int index, boolean value) {
+        if (value) {
+            currentBits |= (1 << index);
+        } else {
+            currentBits &= ~(1 << index);
+        }
+    }
+
+    /**
+     * Converts the current bit representation back to a floating-point value
+     * and updates the UI and visualizations.
+     */
+    private void updateFromBits() {
+        currentValue = Float.intBitsToFloat(currentBits);
+
+        // Update display
+        DecimalFormat df = new DecimalFormat("#.##########");
+        valueLabel.setText(df.format(currentValue) + " (0x" + Integer.toHexString(currentBits) + ")");
+
+        // Update component labels
+        updateComponentLabels();
+
+        // Update visualizations
+        numberLinePanel.updateValue(currentValue);
+        precisionLossPanel.updateValue(currentValue);
+    }
+
+    /**
+     * Displays a dialog to select and visualize special IEEE 754 values.
+     */
+    private void showSpecialValuesDialog() {
+        String[] options = {
+                "Positive Zero (+0.0)",
+                "Negative Zero (-0.0)",
+                "Positive Infinity",
+                "Negative Infinity",
+                "Not a Number (NaN)",
+                "Minimum Positive Normal",
+                "Maximum Positive Normal",
+                "Minimum Positive Subnormal",
+                "Cancel"
+        };
+
+        int selection = JOptionPane.showOptionDialog(
+                this,
+                "Select a special value to view:",
+                "IEEE 754 Special Values",
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.INFORMATION_MESSAGE,
+                null,
+                options,
+                options[0]
+        );
+
+        switch (selection) {
+            case 0: setCurrentValue(0.0f); break;
+            case 1: setCurrentValue(-0.0f); break;
+            case 2: setCurrentValue(Float.POSITIVE_INFINITY); break;
+            case 3: setCurrentValue(Float.NEGATIVE_INFINITY); break;
+            case 4: setCurrentValue(Float.NaN); break;
+            case 5: setCurrentValue(Float.MIN_NORMAL); break;
+            case 6: setCurrentValue(Float.MAX_VALUE); break;
+            case 7: setCurrentValue(Float.MIN_VALUE); break;
+            default: // Cancel or close
+        }
+    }
+
+    /**
+     * Panel for visualizing the number line representation of the floating-point value.
+     */
+    class NumberLinePanel extends JPanel {
+        private static final int PADDING = 30;
+        private static final int TICK_SIZE = 5;
+
+        private float value = 0.0f;
+        private double minRange = -10.0;
+        private double maxRange = 10.0;
+        private JSlider zoomSlider;
+
+        /**
+         * Constructs the NumberLinePanel.
+         */
+        public NumberLinePanel() {
+            setPreferredSize(new Dimension(800, 300));
+
+            // Add zoom control
+            zoomSlider = new JSlider(JSlider.HORIZONTAL, 0, 100, 50);
+            zoomSlider.addChangeListener(e -> {
+                updateZoom();
+                repaint();
+            });
+
+            setLayout(new BorderLayout());
+            JPanel controlPanel = new JPanel();
+            controlPanel.add(new JLabel("Zoom:"));
+            controlPanel.add(zoomSlider);
+            add(controlPanel, BorderLayout.SOUTH);
+        }
+
+        /**
+         * Updates the value displayed on the number line.
+         * @param newValue The new floating-point value.
+         */
+        public void updateValue(float newValue) {
+            this.value = newValue;
+
+            // Auto-adjust range if value is outside current range
+            if (!Float.isNaN(newValue) && !Float.isInfinite(newValue)) {
+                if (newValue > maxRange || newValue < minRange) {
+                    double range = Math.max(Math.abs(newValue) * 1.5, 10.0);
+                    minRange = -range;
+                    maxRange = range;
+                }
+            }
+
+
+            repaint();
+        }
+
+        /**
+         * Updates the visible range of the number line based on the zoom slider.
+         */
+        private void updateZoom() {
+            int zoomLevel = zoomSlider.getValue();
+            // Exponential zoom for better control
+            double range = Math.pow(10, (100 - zoomLevel) / 25.0);
+
+            // Center around current value if not special
+            double center = (Float.isNaN(value) || Float.isInfinite(value)) ? 0 : value;
+
+            minRange = center - range;
+            maxRange = center + range;
+        }
+
+        /**
+         * Paints the number line, tick marks, labels, and the current value pointer.
+         * @param g The Graphics object to paint on.
+         */
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2d = (Graphics2D) g;
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            int width = getWidth() - 2 * PADDING;
+            int height = getHeight() - 2 * PADDING;
+            int centerY = PADDING + height / 2;
+
+            // Draw number line
+            g2d.setStroke(new BasicStroke(2));
+            g2d.drawLine(PADDING, centerY, PADDING + width, centerY);
+
+            // Draw tick marks and labels
+            drawTickMarks(g2d, width, centerY);
+
+            // Draw current value pointer
+            drawValuePointer(g2d, width, centerY);
+        }
+
+        /**
+         * Draws the tick marks and labels on the number line.
+         * @param g2d The Graphics2D object.
+         * @param width The width of the drawable area.
+         * @param centerY The y-coordinate of the center line.
+         */
+        private void drawTickMarks(Graphics2D g2d, int width, int centerY) {
+            // Calculate tick spacing based on range
+            double range = maxRange - minRange;
+            int numTicks = 10;
+            double tickStep = range / numTicks;
+
+            // Round to a nice number
+            tickStep = roundToNiceNumber(tickStep);
+
+            // Draw tick marks
+            DecimalFormat df = new DecimalFormat("#.####");
+            for (double value = minRange; value <= maxRange; value += tickStep) {
+                int x = PADDING + (int)((value - minRange) / (maxRange - minRange) * width);
+
+                // Draw tick
+                g2d.setStroke(new BasicStroke(1));
+                g2d.drawLine(x, centerY - TICK_SIZE, x, centerY + TICK_SIZE);
+
+                // Draw label
+                String label = df.format(value);
+                FontMetrics fm = g2d.getFontMetrics();
+                int labelWidth = fm.stringWidth(label);
+                g2d.drawString(label, x - labelWidth / 2, centerY + TICK_SIZE + fm.getHeight());
+            }
+
+            // Draw zero specially
+            if (minRange <= 0 && maxRange >= 0) {
+                int zeroX = PADDING + (int)((-minRange) / (maxRange - minRange) * width);
+                g2d.setStroke(new BasicStroke(2));
+                g2d.drawLine(zeroX, centerY - TICK_SIZE * 2, zeroX, centerY + TICK_SIZE * 2);
+                g2d.drawString("0", zeroX + 5, centerY - 5);
+            }
+        }
+
+        /**
+         * Rounds a value to a "nice" number for tick mark spacing.
+         * @param value The value to round.
+         * @return The rounded value.
+         */
+        private double roundToNiceNumber(double value) {
+            // Find the magnitude
+            double magnitude = Math.pow(10, Math.floor(Math.log10(value)));
+            double normalized = value / magnitude;
+
+            // Round to a nice number
+            if (normalized < 1.5) return magnitude;
+            else if (normalized < 3) return 2 * magnitude;
+            else if (normalized < 7) return 5 * magnitude;
+            else return 10 * magnitude;
+        }
+
+        /**
+         * Draws a pointer and label for the current value on the number line.
+         * Handles special values (NaN, Infinity) by displaying text.
+         * @param g2d The Graphics2D object.
+         * @param width The width of the drawable area.
+         * @param centerY The y-coordinate of the center line.
+         */
+        private void drawValuePointer(Graphics2D g2d, int width, int centerY) {
+            // Handle special cases
+            if (Float.isNaN(value)) {
+                g2d.setColor(Color.RED);
+                g2d.drawString("NaN - Not on number line", PADDING, PADDING);
+                return;
+            }
+
+            if (Float.isInfinite(value)) {
+                g2d.setColor(Color.BLUE);
+                String text = value > 0 ? "Positive Infinity →" : "← Negative Infinity";
+                int x = value > 0 ? PADDING + width - 150 : PADDING + 10;
+                g2d.drawString(text, x, PADDING);
+                return;
+            }
+
+            // If value is within range, draw pointer
+            if (value >= minRange && value <= maxRange) {
+                int x = PADDING + (int)((value - minRange) / (maxRange - minRange) * width);
+
+                // Draw triangle pointer
+                int[] xPoints = {x, x - 5, x + 5};
+                int[] yPoints = {centerY - 15, centerY - 5, centerY - 5};
+                g2d.setColor(new Color(200, 0, 0));
+                g2d.fillPolygon(xPoints, yPoints, 3);
+
+                // Draw value label
+                String label = String.valueOf(value);
+                FontMetrics fm = g2d.getFontMetrics();
+                int labelWidth = fm.stringWidth(label);
+                g2d.drawString(label, x - labelWidth / 2, centerY - 20);
+            } else {
+                // Draw arrow indicating value is off-scale
+                g2d.setColor(Color.RED);
+                if (value < minRange) {
+                    g2d.drawString("← " + value + " (off scale)", PADDING, PADDING);
+                } else {
+                    String text = value + " (off scale) →";
+                    FontMetrics fm = g2d.getFontMetrics();
+                    int labelWidth = fm.stringWidth(text);
+                    g2d.drawString(text, PADDING + width - labelWidth, PADDING);
+                }
+            }
+        }
+    }
+
+    /**
+     * Panel for visualizing precision loss in floating-point representation.
+     * Shows the current value and the next and previous representable values.
+     */
+    class PrecisionLossPanel extends JPanel {
+        private float value = 0.0f;
+        private float nextValue;
+        private float prevValue;
+        private double representableGap;
+
+        /**
+         * Constructs the PrecisionLossPanel.
+         */
+        public PrecisionLossPanel() {
+            setPreferredSize(new Dimension(800, 300));
+        }
+
+        /**
+         * Updates the value for the precision loss visualization.
+         * Calculates the next and previous representable values and the gap.
+         * @param newValue The new floating-point value.
+         */
+        public void updateValue(float newValue) {
+            this.value = newValue;
+
+            // Calculate next and previous representable values
+            if (!Float.isNaN(newValue) && !Float.isInfinite(newValue)) {
+                int bits = Float.floatToIntBits(newValue);
+
+                // Next value
+                int nextBits = (newValue >= 0) ? bits + 1 : bits - 1;
+                nextValue = Float.intBitsToFloat(nextBits);
+
+                // Previous value
+                int prevBits = (newValue >= 0) ? bits - 1 : bits + 1;
+                prevValue = Float.intBitsToFloat(prevBits);
+
+                // Calculate gap
+                representableGap = Math.abs(nextValue - value);
+            }
+
+            repaint();
+        }
+
+        /**
+         * Paints the precision loss visualization, including the magnified number line
+         * and information about representable values and the gap.
+         * @param g The Graphics object to paint on.
+         */
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2d = (Graphics2D) g;
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+
+            int width = getWidth() - 60;
+            int height = getHeight() - 60;
+
+
+            // Handle special cases
+            if (Float.isNaN(value) || Float.isInfinite(value)) {
+                g2d.setColor(Color.RED);
+                String message = Float.isNaN(value) ?
+                        "NaN has no precision visualization" :
+                        (value > 0 ? "Positive Infinity" : "Negative Infinity");
+                g2d.drawString(message, 30, 30);
+                return;
+            }
+
+            // Title with improved formatting
+            g2d.setFont(new Font("SansSerif", Font.BOLD, 16));
+            g2d.drawString("Precision Visualization for " + value, 30, 30);
+
+            // Info text with clearer formatting
+            g2d.setFont(new Font("SansSerif", Font.PLAIN, 12));
+            DecimalFormat fullPrecision = new DecimalFormat("0.###################");
+            g2d.drawString("Previous representable value: " + fullPrecision.format(prevValue), 30, 50);
+            g2d.drawString("Next representable value: " + fullPrecision.format(nextValue), 30, 70);
+            g2d.drawString("Gap to next value: " + String.format("%.16e", representableGap), 30, 90);
+
+
+            // Draw magnified number line
+            int centerY = 150;
+            g2d.setStroke(new BasicStroke(2));
+            g2d.drawLine(30, centerY, 30 + width, centerY);
+
+            // Draw small ticks along the number line for reference
+            g2d.setStroke(new BasicStroke(1));
+            for (int i = 0; i <= 10; i++) {
+                int tickX = 30 + (i * width / 10);
+                g2d.drawLine(tickX, centerY - 5, tickX, centerY + 5);
+            }
+
+
+            // Draw representable values
+            double minValue = Math.min(prevValue, Math.min(value, nextValue));
+            double maxValue = Math.max(prevValue, Math.max(value, nextValue));
+            // Add a little padding
+            double range = maxValue - minValue;
+            minValue -= range * 0.1;
+            maxValue += range * 0.1;
+
+
+            // Draw tick marks for representable values
+            // Change drawing order to handle label overlap better
+            // Draw prev and next values first, then the current value on top
+            drawTickMark(g2d, prevValue, minValue, maxValue, width, centerY, Color.GRAY);
+            drawTickMark(g2d, nextValue, minValue, maxValue, width, centerY, Color.GRAY);
+            drawTickMark(g2d, value, minValue, maxValue, width, centerY, Color.RED);
+
+
+            // Draw explanation
+            g2d.setFont(new Font("Dialog", Font.PLAIN, 12));
+            g2d.setColor(Color.BLACK);
+            g2d.drawString("As the magnitude of a floating-point number increases, the gap between", 30, centerY + 50);
+            g2d.drawString("representable values increases, resulting in reduced precision.", 30, centerY + 70);
+            g2d.drawString("This means that for larger numbers, there are fewer distinct values that can be accurately represented.", 30, centerY + 90); // Added detail
+
+            // Draw relative precision indicator
+            drawPrecisionIndicator(g2d, centerY + 120); // Adjusted Y position
+        }
+
+        /**
+         * Draws a tick mark for a specific representable value on the magnified number line.
+         * @param g2d The Graphics2D object.
+         * @param value The value to draw the tick mark for.
+         * @param min The minimum value of the visible range.
+         * @param max The maximum value of the visible range.
+         * @param width The width of the drawable area.
+         * @param centerY The y-coordinate of the center line.
+         * @param color The color of the tick mark and label.
+         */
+        private void drawTickMark(Graphics2D g2d, double value, double min, double max, int width, int centerY, Color color) {
+            int x = 30 + (int)((value - min) / (max - min) * width);
+
+            // Draw tick with appropriate color and thickness
+            g2d.setColor(color);
+            if (color == Color.RED) {
+                g2d.setStroke(new BasicStroke(2));
+                g2d.drawLine(x, centerY - 12, x, centerY + 12);
+            } else {
+                g2d.setStroke(new BasicStroke(1));
+                g2d.drawLine(x, centerY - 10, x, centerY + 10);
+            }
+
+            // Draw label with improved positioning
+            DecimalFormat df = new DecimalFormat("#.##############");
+            String label = df.format(value);
+            FontMetrics fm = g2d.getFontMetrics();
+            int labelWidth = fm.stringWidth(label);
+
+            // No rotation for clarity - position alternating above and below
+            // For the current value (red), always position above for emphasis
+            if (color == Color.RED) {
+                g2d.drawString(label, x - labelWidth / 2, centerY - 15);
+            } else if (value < this.value) {
+                // Previous value below
+                g2d.drawString(label, x - labelWidth / 2, centerY + 25);
+            } else {
+                // Next value above
+                g2d.drawString(label, x - labelWidth / 2, centerY - 15);
+            }
+        }
+
+        /**
+         * Draws an indicator representing the relative precision of the current value.
+         * @param g2d The Graphics2D object.
+         * @param y The y-coordinate to start drawing the indicator.
+         */
+        private void drawPrecisionIndicator(Graphics2D g2d, int y) {
+            if (Float.isNaN(value) || Float.isInfinite(value)) return;
+
+            int width = getWidth() - 60;
+
+            g2d.setColor(Color.BLACK);
+            g2d.drawString("Relative Precision:", 30, y);
+
+            // Calculate relative precision (gap / value)
+            double relativePrecision = Math.abs(representableGap / value);
+            String precText = String.format("%.3e", relativePrecision);
+            g2d.drawString(precText, 150, y);
+
+            // Draw precision bar
+            int barY = y + 20;
+            g2d.drawRect(30, barY, width, 20);
+
+            // Map to log scale for better visualization
+            double logPrecision = -Math.log10(relativePrecision);
+            // Clamp to reasonable range (precision between 10^-15 and 10^0)
+            logPrecision = Math.max(0, Math.min(logPrecision, 15));
+
+
+            int barWidth = (int)(width * logPrecision / 15);
+            g2d.setColor(new Color(0, 150, 0));
+            g2d.fillRect(30, barY, barWidth, 20);
+
+            // Add scale
+            g2d.setColor(Color.BLACK);
+            for (int i = 0; i <= 15; i += 3) {
+                int x = 30 + (int)(width * i / 15);
+                g2d.drawLine(x, barY + 20, x, barY + 25);
+                g2d.drawString("10^-" + i, x - 15, barY + 40);
+            }
+        }
+    }
+
+
+    /**
+     * Main method to launch the application.
+     * @param args Command line arguments (not used).
+     */
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new IEEE754Visualizer());
+    }
+}
