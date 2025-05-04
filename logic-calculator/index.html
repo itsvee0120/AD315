@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Logic Calculator</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Logic Calculator</h1>
+
+      <div class="tabs">
+        <button id="calculatorTabBtn" class="tab-btn active">
+          Interactive Calculator
+        </button>
+        <button id="truthTableTabBtn" class="tab-btn">Truth Table</button>
+      </div>
+
+      <div id="calculatorView" class="view">
+        <div class="card">
+          <h2>Input Values</h2>
+          <div class="input-grid">
+            <div class="input-group">
+              <label>Value A:</label>
+              <div class="radio-group">
+                <label>
+                  <input type="radio" name="inputA" value="false" checked />
+                  <span>False</span>
+                </label>
+                <label>
+                  <input type="radio" name="inputA" value="true" />
+                  <span>True</span>
+                </label>
+              </div>
+            </div>
+            <div class="input-group">
+              <label>Value B:</label>
+              <div class="radio-group">
+                <label>
+                  <input type="radio" name="inputB" value="false" checked />
+                  <span>False</span>
+                </label>
+                <label>
+                  <input type="radio" name="inputB" value="true" />
+                  <span>True</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Results</h2>
+          <div class="results-grid">
+            <div class="result-card" id="and-card">
+              <div class="result-header">
+                <h3>Conjunction (AND)</h3>
+                <span class="symbol">A ∧ B</span>
+              </div>
+              <p class="description">True only when both A and B are true</p>
+              <div class="result-footer">
+                <span class="formula">False AND False =</span>
+                <span class="value false">False</span>
+              </div>
+            </div>
+            <div class="result-card" id="or-card">
+              <div class="result-header">
+                <h3>Disjunction (OR)</h3>
+                <span class="symbol">A ∨ B</span>
+              </div>
+              <p class="description">
+                True when either A or B (or both) are true
+              </p>
+              <div class="result-footer">
+                <span class="formula">False OR False =</span>
+                <span class="value false">False</span>
+              </div>
+            </div>
+            <div class="result-card" id="not-a-card">
+              <div class="result-header">
+                <h3>Negation of A (NOT A)</h3>
+                <span class="symbol">¬A</span>
+              </div>
+              <p class="description">True when A is false</p>
+              <div class="result-footer">
+                <span class="formula">NOT False =</span>
+                <span class="value true">True</span>
+              </div>
+            </div>
+            <div class="result-card" id="not-b-card">
+              <div class="result-header">
+                <h3>Negation of B (NOT B)</h3>
+                <span class="symbol">¬B</span>
+              </div>
+              <p class="description">True when B is false</p>
+              <div class="result-footer">
+                <span class="formula">NOT False =</span>
+                <span class="value true">True</span>
+              </div>
+            </div>
+            <div class="result-card" id="implies-card">
+              <div class="result-header">
+                <h3>Implication (IF A THEN B)</h3>
+                <span class="symbol">A → B</span>
+              </div>
+              <p class="description">
+                False only when A is true and B is false
+              </p>
+              <div class="result-footer">
+                <span class="formula">IF False THEN False =</span>
+                <span class="value true">True</span>
+              </div>
+            </div>
+            <div class="result-card" id="iff-card">
+              <div class="result-header">
+                <h3>Biconditional (IF AND ONLY IF)</h3>
+                <span class="symbol">A ↔ B</span>
+              </div>
+              <p class="description">True when A and B have the same value</p>
+              <div class="result-footer">
+                <span class="formula">False IF AND ONLY IF False =</span>
+                <span class="value true">True</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="truthTableView" class="view hidden">
+        <div class="card">
+          <h2>Truth Table</h2>
+          <div class="table-container">
+            <table id="truthTable">
+              <thead>
+                <tr>
+                  <th>A</th>
+                  <th>B</th>
+                  <th>A ∧ B<br />(AND)</th>
+                  <th>A ∨ B<br />(OR)</th>
+                  <th>¬A<br />(NOT A)</th>
+                  <th>¬B<br />(NOT B)</th>
+                  <th>A → B<br />(IMPLIES)</th>
+                  <th>A ↔ B<br />(IFF)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Truth table rows will be generated by JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <h3>Logic Operations Guide</h3>
+        <ul>
+          <li>
+            <strong>Conjunction (AND, ∧):</strong> True only when both
+            statements are true.
+          </li>
+          <li>
+            <strong>Disjunction (OR, ∨):</strong> True when at least one
+            statement is true.
+          </li>
+          <li>
+            <strong>Negation (NOT, ¬):</strong> Reverses the truth value of a
+            statement.
+          </li>
+          <li>
+            <strong>Implication (IF...THEN, →):</strong> False only when the
+            antecedent (A) is true and the consequent (B) is false.
+          </li>
+          <li>
+            <strong>Biconditional (IF AND ONLY IF, ↔):</strong> True when both
+            statements have the same truth value (both true or both false).
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
