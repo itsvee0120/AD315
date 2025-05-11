@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Permutations and Combinations Calculator</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 50px;
+        background-color: #f4f4f4;
+      }
+      h1 {
+        color: #333;
+      }
+      input {
+        padding: 10px;
+        font-size: 16px;
+        margin: 10px;
+      }
+      button {
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+      .result {
+        margin-top: 20px;
+        padding: 15px;
+        background-color: #fff;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Permutations and Combinations Calculator</h1>
+    <label for="n">Enter Total Items (n):</label>
+    <input type="number" id="n" placeholder="Enter n" required />
+    <label for="r">Enter Items to Choose/Arrange (r):</label>
+    <input type="number" id="r" placeholder="Enter r" required />
+    <button onclick="calculate()">Calculate</button>
+
+    <div id="result" class="result"></div>
+
+    <script>
+      // Function to calculate factorial
+      function factorial(num) {
+        if (num === 0 || num === 1) return 1;
+        let fact = 1;
+        for (let i = 2; i <= num; i++) {
+          fact *= i;
+        }
+        return fact;
+      }
+
+      // Function to calculate permutations (P(n, r) = n! / (n - r)!)
+      function permutations(n, r) {
+        return factorial(n) / factorial(n - r);
+      }
+
+      // Function to calculate combinations (C(n, r) = n! / (r! * (n - r)!))
+      function combinations(n, r) {
+        return factorial(n) / (factorial(r) * factorial(n - r));
+      }
+
+      // Function to handle the calculation and display results
+      function calculate() {
+        const n = parseInt(document.getElementById("n").value);
+        const r = parseInt(document.getElementById("r").value);
+        const resultDiv = document.getElementById("result");
+
+        if (isNaN(n) || isNaN(r) || n < r) {
+          resultDiv.innerHTML = "Please enter valid numbers where n ≥ r.";
+          return;
+        }
+
+        const perm = permutations(n, r);
+        const comb = combinations(n, r);
+
+        resultDiv.innerHTML = `
+        <p><strong>Permutations (P(n, r)):</strong> ${perm}</p>
+        <p><strong>Combinations (C(n, r)):</strong> ${comb}</p>
+      `;
+      }
+    </script>
+  </body>
+</html>
