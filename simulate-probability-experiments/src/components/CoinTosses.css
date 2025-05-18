@@ -1,0 +1,30 @@
+.chart-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 50px;
+}
+.btn {
+  margin: 0 10px;
+  padding: 10px 16px;
+  font-size: 1rem;
+  background-color: #0077cc;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.btn:hover {
+  background-color: #005fa3;
+}
+
+.btn.secondary {
+  background-color: #4b5563;
+}
+
+.btn.secondary:hover {
+  background-color: #374151;
+}
+
+.container {
+  text-align: center;
+}

@@ -1,0 +1,128 @@
+/* Container styling */
+.dice-roll-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Dropdown container */
+.select-container {
+  margin-bottom: 1rem;
+}
+
+.select-container label {
+  margin-right: 0.5rem;
+}
+
+.select-container select {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 0.25rem;
+}
+
+/* Buttons */
+.button-group {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.button {
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.button-roll {
+  background-color: #2563eb; /* blue-600 */
+}
+
+.button-roll:hover {
+  background-color: #1d4ed8; /* blue-700 */
+}
+
+.button-clear {
+  background-color: #4b5563; /* gray-600 */
+}
+
+.button-clear:hover {
+  background-color: #374151; /* gray-700 */
+}
+
+/* Results section */
+.results-container {
+  width: 100%;
+  max-width: 28rem;
+}
+
+.results-box {
+  margin-bottom: 1rem;
+}
+
+.results-grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.result-item {
+  margin: 0.25rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #dbeafe; /* blue-100 */
+  border: 1px solid #93c5fd; /* blue-300 */
+  border-radius: 0.375rem;
+}
+
+/* Statistics */
+.statistics-container {
+  margin-top: 1rem;
+}
+
+.stat-line {
+  display: flex;
+  align-items: center;
+  margin-top: 0.25rem;
+}
+
+.stat-label {
+  width: 2rem;
+}
+
+.stat-count {
+  width: 2rem;
+  text-align: right;
+  margin-left: 0.5rem;
+}
+
+.stat-bar-container {
+  flex: 1;
+  background-color: #e5e7eb; /* gray-200 */
+  border-radius: 9999px;
+  height: 1rem;
+  margin-left: 0.5rem;
+  position: relative;
+}
+
+.stat-bar {
+  background-color: #2563eb; /* blue-600 */
+  height: 1rem;
+  border-radius: 9999px;
+}
+
+.stat-percentage {
+  width: 4rem;
+  text-align: right;
+  margin-left: 0.5rem;
+}
+
+/* Heading */
+.section-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+}

@@ -1,0 +1,149 @@
+.carddraw-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.select-container {
+  margin-bottom: 1rem;
+}
+
+.select-container label {
+  margin-right: 0.5rem;
+}
+
+.select-container select {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 0.25rem;
+}
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.button {
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.button-draw {
+  background-color: #2563eb;
+}
+
+.button-draw:hover {
+  background-color: #1d4ed8;
+}
+
+.button-clear {
+  background-color: #4b5563;
+}
+
+.button-clear:hover {
+  background-color: #374151;
+}
+
+.results-container {
+  width: 100%;
+  max-width: 28rem;
+}
+
+.results-box {
+  margin-bottom: 1rem;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.card-grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.card {
+  width: 5rem;
+  height: 7rem;
+  margin: 0.25rem;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-width: 2px;
+  border-radius: 0.5rem;
+  font-weight: bold;
+}
+
+.card-red {
+  color: #dc2626;
+  background-color: #fee2e2;
+  border-color: #fecaca;
+}
+
+.card-blue {
+  color: black;
+  background-color: #dbeafe;
+  border-color: #bfdbfe;
+}
+
+.card-suit {
+  font-size: 1rem;
+}
+
+.card-value {
+  font-size: 1.25rem;
+}
+
+.statistics-container {
+  margin-top: 1rem;
+}
+
+.stat-line {
+  display: flex;
+  align-items: center;
+  margin-top: 0.25rem;
+}
+
+.stat-label {
+  width: 6rem;
+}
+
+.stat-count {
+  width: 2rem;
+  text-align: right;
+}
+
+.stat-bar-container {
+  flex: 1;
+  background-color: #e5e7eb;
+  border-radius: 9999px;
+  height: 1rem;
+  margin-left: 0.5rem;
+}
+
+.stat-bar {
+  height: 1rem;
+  border-radius: 9999px;
+}
+
+.red-bar {
+  background-color: #dc2626;
+}
+
+.blue-bar {
+  background-color: #2563eb;
+}
+
+.stat-percentage {
+  width: 4rem;
+  text-align: right;
+  margin-left: 0.5rem;
+}
