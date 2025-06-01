@@ -1,70 +1,103 @@
-# Getting Started with Create React App
+# Bayesian Diagnostic Calculator
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This React-based application calculates the probability of having a disease given a positive or negative test result, using **Bayes' Theorem**. It's designed for medical professionals and students who want a quick and accurate way to interpret diagnostic tests.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## Features
 
-### `npm start`
+- Input:
+  - Disease Prevalence
+  - Test Sensitivity
+  - Test Specificity
+- Outputs:
+  - Probability of Disease given a Positive Test (P(Disease|Test+))
+  - Probability of Disease given a Negative Test (P(Disease|Test−))
+- Extras:
+  - Confusion matrix (True Positive, False Positive, etc.)
+  - Interactive pie chart using Recharts
+  - Clean and responsive UI
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Tech Stack
 
-### `npm test`
+- **React** – Frontend library
+- **Recharts** – Visualization
+- **HTML/CSS** – Styling and layout
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+## Installation
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### 1. Clone the Repository
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```bash
+git clone https://github.com/your-username/bayesian-calculator.git
+cd bayesian-calculator
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### 2. Install Dependencies
 
-### `npm run eject`
+```bash
+npm install
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### 3. Run the App
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```bash
+npm start
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Open `http://localhost:3000` in your browser.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+---
 
-## Learn More
+## How to Use
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+1. **Enter:**
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+   - **Prevalence** (e.g. 5)
+   - **Sensitivity** (e.g. 90)
+   - **Specificity** (e.g. 95)
 
-### Code Splitting
+2. Click **Calculate**
+3. View:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+   - **P(Disease | Test +)** = e.g. 48.65%
+   - **P(Disease | Test -)** = e.g. 0.55%
 
-### Analyzing the Bundle Size
+4. See confusion matrix and pie chart for visual breakdown
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+---
 
-### Making a Progressive Web App
+## How It Works
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+This app uses **Bayes’ Theorem**:
 
-### Advanced Configuration
+### P(Disease | Test+):
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+$$
+P(D|T+) = \frac{P(T+|D) \cdot P(D)}{P(T+)}
+$$
 
-### Deployment
+### P(Disease | Test−):
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+$$
+P(D|T−) = \frac{P(T−|D) \cdot P(D)}{P(T−)}
+$$
 
-### `npm run build` fails to minify
+It also computes a confusion matrix:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- **TP**: True Positive
+- **FP**: False Positive
+- **TN**: True Negative
+- **FN**: False Negative
+
+---
+
+## Extra Credit Features
+
+- Confusion matrix table
+- Pie chart (Recharts)
+- Responsive UI with validation
